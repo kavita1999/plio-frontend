@@ -101,7 +101,6 @@ export default {
           () =>
             (this.player = new Plyr("#player", {
               controls: [
-                "play",
                 "play-large",
                 "progress",
                 "current-time",
