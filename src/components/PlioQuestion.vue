@@ -57,6 +57,13 @@
             v-if="isAnswerSubmitted && !isAnswerCorrect"
           ></i>
 
+          <div id="score" data-pct="4/6" v-if="isAnswerSubmitted">
+            <svg id="svg" width="200" height="200" viewPort="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
+              <circle r="90" cx="100" cy="100" fill="transparent" stroke-dasharray="565.48" stroke-dashoffset="0"></circle>
+              <circle id="bar" r="90" cx="100" cy="100" fill="transparent" stroke-dasharray="565.48" stroke-dashoffset="0"></circle>
+            </svg>
+          </div>
+
           <!-- submit button -->
           <loading-spinner v-if="showButtonLoading"></loading-spinner>
           <button
@@ -66,10 +73,10 @@
             :disabled="isDisabled"
             @click="clickSubmit"
           >
-            ✓ Submit
+          ✓ सबमिट करें
           </button>
           <button id="revise-button" class="btn revise" @click="clickRevise">
-            ⟳ Revise
+          ⟳ पुनः देखें
           </button>
 
           <!-- close button -->
@@ -78,7 +85,7 @@
             class="btn close"
             @click="clickClose"
           >
-            ☓ Close
+          आगे बढ़ें
           </button>
         </div>
       </div>
@@ -197,6 +204,35 @@ export default {
       });
     },
 
+    showScore(){
+      var val = 66;
+      var circle = null
+      setTimeout(() => {
+        circle = document.querySelector('#bar');
+        console.log(circle)
+        if (isNaN(val)) {
+        val = 100;
+        }
+        else{
+          var r = circle.getAttribute('r');
+          var c = Math.PI*(r*2);
+        
+          if (val < 0) { val = 0;}
+          if (val > 100) { val = 100;}
+          
+          var pct = ((100-val)/100)*c;
+          
+
+          document.querySelector('#bar').style.strokeDashoffset = pct;
+          document.querySelector('#svg circle').style.strokeDashoffset = pct;
+          // circle.css({ strokeDashoffset: pct});
+          console.log("LOL")
+          document.querySelector('#score').setAttribute('data-pct','10/10');
+        }
+      }, 200);
+      
+    },
+
     clickSubmit() {
       // Things to do after clicking submit
       // 1-Remove old option highlights
@@ -219,6 +255,7 @@ export default {
         this.showButtonLoading = false;
         this.checkAnswer();
         this.showResult();
+        this.showScore();
       }, loadTime);
     },
 
@@ -452,6 +489,7 @@ input {
     color: white;
     @media (orientation: portrait) {
       padding: 2px 15px;
+      height: fit-content;
     }
     padding: 2px 40px;
     text-align: center;
@@ -525,6 +563,42 @@ input {
     background-color: #f44336;
     border-radius: 5px;
     color: white;
+  }
+
+  #svg circle {
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 1s linear;
+    stroke: #666;
+    stroke-width: 1em;
+  }
+  #svg #bar {
+    stroke: #FF9F1E;
+  }
+  #score {
+    display: block;
+    height: 200px;
+    width: 200px;
+    margin: 2em auto;
+    box-shadow: 0 0 1em black;
+    border-radius: 100%;
+    position: relative;
+    text-align: center;
+  }
+  #score:after {
+    position: absolute;
+    display: block;
+    height: 160px;
+    width: 160px;
+    left: 50%;
+    top: 50%;
+    box-shadow: inset 0 0 1em black;
+    content: attr(data-pct);
+    margin-top: -80px;
+    margin-left: -80px;
+    border-radius: 100%;
+    line-height: 160px;
+    font-size: 2em;
+    text-shadow: 0 0 0.5em black;
   }
 }
 .fade-enter-active,
