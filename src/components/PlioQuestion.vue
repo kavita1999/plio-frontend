@@ -74,10 +74,10 @@
             :disabled="isDisabled"
             @click="clickSubmit"
           >
-          ✓ सबमिट करें
+            ✓ Submit
           </button>
           <button id="revise-button" class="btn revise" @click="clickRevise">
-          ⟳ पुनः देखें
+            ⟳ Revise
           </button>
 
           <!-- close button -->
@@ -86,7 +86,7 @@
             class="btn close"
             @click="clickClose"
           >
-          आगे बढ़ें
+            ☓ Close
           </button>
         </div>
       </div>
@@ -518,7 +518,6 @@ input {
     color: white;
     @media (orientation: portrait) {
       padding: 2px 15px;
-      height: fit-content;
     }
     padding: 2px 40px;
     text-align: center;
