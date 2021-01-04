@@ -58,7 +58,7 @@
             v-if="isAnswerSubmitted && !isAnswerCorrect"
           ></i>
 
-          <div id="score" data-pct="4/6" v-if="isAnswerSubmitted">
+          <div id="score" data-pct="" v-if="isAnswerSubmitted">
             <svg id="svg" width="200" height="200" viewPort="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
               <circle r="90" cx="100" cy="100" fill="transparent" stroke-dasharray="565.48" stroke-dashoffset="0"></circle>
               <circle id="bar" r="90" cx="100" cy="100" fill="transparent" stroke-dasharray="565.48" stroke-dashoffset="0"></circle>
@@ -103,7 +103,7 @@ var loadTime = 1500;
 export default {
   components: { LoadingSpinner },
   name: "PlioQuestion",
-  props: ["plioQuestion"],
+  props: ["plioQuestion", "currentScore", "currentCompletionPercent", "totalQuestions"],
   data() {
     return {
       show: false,
@@ -112,6 +112,8 @@ export default {
       isAnswerCorrect: false,
       isAnswerSubmitted: false,
       showButtonLoading: false,
+      updatedScore: 0,
+      updatedCompletionPercent: 0
     };
   },
 
@@ -135,7 +137,7 @@ export default {
     // Returns the index of the question that has popped up.
     currentQuestionIndex() {
       return this.plioQuestion.id;
-    },
+    }
   },
   methods: {
     // Closes the question window
@@ -169,6 +171,11 @@ export default {
       this.text = "";
       this.show = true;
       document.querySelector("body").classList.add("overflow-hidden");
+
+      this.updatedScore = this.currentScore
+      this.updatedCompletionPercent = this.currentCompletionPercent
+      console.log("at open modal score -- " + this.currentScore)
+      console.log("at open modal completion -- " + this.currentCompletionPercent)
     },
 
     // Checks if the selected option is correct or not
@@ -209,12 +216,20 @@ export default {
       });
     },
 
-    showScore(){
-      var val = 66;
+    updateScoreAndCompletion(){
+      if (this.plioQuestion.state != "answered"){
+        if (this.isAnswerCorrect && this.updatedScore < this.totalQuestions){
+          this.updatedScore += 1
+        }
+        this.updatedCompletionPercent += ((1/this.totalQuestions)*100)
+      }
+    },
+
+    showScoreAndCompletion(){
+      var val = this.updatedCompletionPercent;
       var circle = null
       setTimeout(() => {
         circle = document.querySelector('#bar');
-        console.log(circle)
         if (isNaN(val)) {
         val = 100;
         }
@@ -230,9 +245,9 @@ export default {
 
           document.querySelector('#bar').style.strokeDashoffset = pct;
           document.querySelector('#svg circle').style.strokeDashoffset = pct;
-          // circle.css({ strokeDashoffset: pct});
-          console.log("LOL")
-          document.querySelector('#score').setAttribute('data-pct','10/10');
+
+          var score = (parseInt(this.currentQuestionIndex)+1).toString() + '/' + this.totalQuestions.toString()
+          document.querySelector('#score').setAttribute('data-pct', score);
         }
       }, 200);
       
@@ -260,7 +275,12 @@ export default {
         this.showButtonLoading = false;
         this.checkAnswer();
         this.showResult();
-        this.showScore();
+        this.updateScoreAndCompletion();
+        console.log("Updated score --")
+        console.log(this.updatedScore)
+        console.log("updated completion --")
+        console.log(this.updatedCompletionPercent)
+        this.showScoreAndCompletion();
       }, loadTime);
     },
 
@@ -269,7 +289,10 @@ export default {
     clickClose() {
       this.closeModal();
       this.isAnswerSubmitted = false;
-      this.$emit("answer-submitted", this.plioQuestion, this.selectedOption);
+      this.$emit(
+        "answer-submitted", this.plioQuestion, 
+        this.selectedOption, this.updatedScore, this.updatedCompletionPercent
+      );
     },
 
     // Things to do when revise button is clicked
@@ -469,6 +492,7 @@ input {
   }
   &__footer {
     width: 100%;
+    height: 6em;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -571,13 +595,13 @@ input {
   }
 
   #svg circle {
-    stroke-dashoffset: 0;
+    stroke-dashoffset: 565.48;
     transition: stroke-dashoffset 1s linear;
     stroke: #666;
     stroke-width: 1em;
   }
   #svg #bar {
-    stroke: #FF9F1E;
+    stroke: #89d624;
   }
   #score {
     display: block;
@@ -588,6 +612,9 @@ input {
     border-radius: 100%;
     position: relative;
     text-align: center;
+    transform: scale(0.4);
+    font-size: 1.4em;
+    font-weight: 700;
   }
   #score:after {
     position: absolute;

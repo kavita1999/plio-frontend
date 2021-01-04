@@ -11,7 +11,9 @@
         :data-plyr-embed-id="videoId"
       ></div>
       <div v-for="plioQuestion in plioQuestions" :key="plioQuestion.id.toString()" >
-        <PlioQuestion :plioQuestion="plioQuestion" :ref="'position' + plioQuestion.id.toString()"
+        <PlioQuestion :plioQuestion="plioQuestion" :currentScore="currentScore" :currentCompletionPercent="currentCompletionPercent" 
+          :ref="'position' + plioQuestion.id.toString()"
+          :totalQuestions="plioQuestions.length"
           @answer-submitted="submitAnswer" @answer-skipped="skipAnswer" @revision-needed="revise"
           @update-journey="updateJourney">
         </PlioQuestion>
@@ -104,7 +106,9 @@ export default {
       sessionId: 1,
       hasPlyrLoaded: false,
       retention: [],
-      previousPlayerTime: 0
+      previousPlayerTime: 0,
+      currentScore: 0,
+      currentCompletionPercent: 0
     };
   },
   async created() {
@@ -195,14 +199,27 @@ export default {
               this.plioQuestions[i].user_answer = this.answers[i]
               this.plioQuestions[i].state = 
                 (this.answers[i].length == 0) ? "notshown" : "answered"
+
+              if (typeof this.answers[i] == "string"){
+                var correctAnswerIndex = this.plioQuestions[i].item.question.answers - 1;
+                var correctAnswer = this.plioQuestions[i].item.question.options[correctAnswerIndex]
+                this.currentScore += (this.answers[i] == correctAnswer) ? 1 : 0
+                this.currentCompletionPercent += 1
+              }
             }
             
             this.journey = res.data.sessionData.journey
             this.previousPlayerTime = (
-              (this.journey.length > 0) ? this.journey[this.journey.length - 1]['player_time'] : [])
+              (this.journey.length > 0) ? this.journey[this.journey.length - 1]['player_time'] : 0)
             this.watchTime += res.data.sessionData['watch-time']
             this.retention = res.data.sessionData.retention
+
+            if (questions.length > 0)
+              this.currentCompletionPercent = Math.ceil((this.currentCompletionPercent/questions.length)*100)
+
           }
+            console.log("player score - " + this.currentScore)
+            console.log("player completion - " + this.currentCompletionPercent)
         })
         .then( this.dataLoaded = true )
         .then(
@@ -282,13 +299,19 @@ export default {
         })
     },
 
-    submitAnswer(plioQuestion, answer) {
+    submitAnswer(plioQuestion, answer, score, completionPercent) {
       // Update state to "answered"
       plioQuestion["state"] = "answered"
 
       // update answer for this question
       plioQuestion.user_answer = answer
 
+      // update score and completion
+      this.currentScore = score;
+      this.currentCompletionPercent = completionPercent;
+
+      console.log("score after emit -- " + this.currentScore)
+      console.log("completion after emit -- " + this.currentCompletionPercent)
       var currQuesIndex = Number(plioQuestion.id)
 
       // Checking if the object is empty or not.
