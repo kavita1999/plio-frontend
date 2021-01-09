@@ -18,11 +18,16 @@
       </div>
 
       <div class="error" v-if="!isFullscreen">
-        <button 
-          class="btn" @click="this.player.fullscreen.enter()">
-          Start <br>
-          शुरू करें 
-        </button>
+        <div class="button-svg-container">
+          <button 
+            class="btn start-button" 
+            @click="startTheVideo"
+            id="start-button">
+            Start <br>
+            शुरू करें 
+          </button>
+          <img class="finger-pointer" src="../assets/finger_point.svg">
+        </div>
       </div>
     </div>
     <Error type="browser_error" :value="browserErrorHandlingValue" v-if="!isBrowserSupported"></Error>
@@ -35,6 +40,7 @@ import axios from "axios";
 import PlioQuestion from "../components/PlioQuestion.vue";
 import Error from "../views/Error.vue";
 import LoadingSpinner from "../components/LoadingSpinner.vue";
+// import fingerPointer from "../assets/finger_point.svg";
 
 // supports indexOf for older browsers
 if (!Array.prototype.indexOf)
@@ -127,7 +133,8 @@ export default {
   components: {
     PlioQuestion,
     Error,
-    LoadingSpinner
+    LoadingSpinner,
+    // fingerPointer
   },
 
   methods: {
@@ -148,6 +155,27 @@ export default {
     logData() {
       if (this.plioId != undefined && this.player.playing) this.uploadJson()
       timeout = setTimeout(this.logData, upload_interval)
+    },
+
+    startTheVideo() {
+      var x = document.getElementById('start-button')
+      x.classList.remove('start-button')
+      x.classList.add('start-button-active')
+      setTimeout(() => {
+        this.player.fullscreen.enter();
+        this.waitFor(() => this.player.fullscreen.active === true)
+        .then(() => this.player.play())
+      }, 400);
+    },
+
+    waitFor(conditionFunction) {
+
+      const poll = resolve => {
+        if(conditionFunction()) resolve();
+        else setTimeout(() => poll(resolve), 400);
+      }
+
+      return new Promise(poll);
     },
 
     fetchData() {
@@ -547,6 +575,33 @@ export default {
     font-size: 1.5rem;
   }
 
+/* .btn:active{
+  
+} */
+
+.start-button{
+  box-shadow: -5px 9px #402e0e, -5px 9px #402e0e, -1px 1px #402e0e;
+}
+
+.start-button:active{
+  background-color: #437044; /* Green */
+  box-shadow: -3px 5px #402e0e, -3px 3px #402e0e, -3px 0px #402e0e;
+  transform: translate(-4px, 4px);
+}
+
+.start-button-active{
+  background-color: #437044; /* Green */
+  box-shadow: -3px 5px #402e0e, -3px 3px #402e0e, -3px 0px #402e0e;
+  transform: translate(-4px, 4px);
+}
+
+.button-svg-container{
+  margin-top: 8em;
+  display: flex;
+  flex-direction: column;
+}
+
+
 .tooltip {
   background:red;
   border-radius: 3px;
@@ -579,5 +634,15 @@ export default {
   bottom: 0;
   left: 0;
   background-color: rgba(255, 255, 255, 0.8);
+}
+
+.finger-pointer{
+  animation: point 1s ease-in-out infinite alternate; 
+}
+
+@keyframes point {
+  100% {
+    transform: translateY(-30px);
+  }
 }
 </style>
