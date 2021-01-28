@@ -69,9 +69,19 @@ export default {
           var redirectId = setInterval(() => {
             if (localStorage.phone != null) {
               if (this.$route.params.id) {
-                if (this.$route.params.type && this.$route.params.type == "experiment") {
-                  // redirect to experiment
-                  this.$router.push({ path: "/experiment/" + this.$route.params.id });
+                if (this.$route.params.type) {
+                  if (this.$route.params.type == "experiment") {
+                    // redirect to experiment
+                    this.$router.push({ path: "/experiment/" + this.$route.params.id });
+                  } else if (this.$route.params.type == "view-experiment") {
+                    this.$router.push({
+                      path: "/view-experiment/" + this.$route.params.id,
+                    });
+                  } else {
+                    this.$router.push({ path: "/" });
+                  }
+                } else if (this.$route.params.id == "experiments") {
+                  this.$router.push({ path: "/experiments" });
                 } else {
                   // redirect to plio
                   this.$router.push({ path: "/play/" + this.$route.params.id });

@@ -3,6 +3,9 @@ import Home from "../views/Home.vue";
 import Player from "../views/Player.vue";
 import PhoneSignIn from "../views/PhoneSignIn";
 import ABTesting from "../views/ABTesting";
+import ExperimentList from "../views/ExperimentList";
+import ExperimentView from "../views/ExperimentView";
+
 
 const routes = [{
         path: "/",
@@ -27,9 +30,19 @@ const routes = [{
         component: PhoneSignIn,
     },
     {
+        path: "/experiments",
+        name: "Experiment List",
+        component: ExperimentList
+    },
+    {
         path: "/experiment/:id?",
         name: "ABTesting",
         component: ABTesting,
+    },
+    {
+        path: "/view-experiment/:id",
+        name: "Experiment View",
+        component: ExperimentView,
     },
     {
         path: '/404-not-found',
