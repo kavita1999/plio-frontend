@@ -9,6 +9,7 @@
           <div class="question_text_row">
             <div class="question_text">
               {{ plioQuestion.item.question.text }}
+            <p id='render-me'>What will be the energy for electromagnetic radiation having wavelength \(6.625\times 10^{-10}\).</p>
             </div>
             <div class="close-container" id="skip-button" @click="clickSkip">
               <font-awesome-icon 
@@ -193,6 +194,9 @@ export default {
       this.text = "";
       this.show = true;
       document.querySelector("body").classList.add("overflow-hidden");
+
+      console.log(document.getElementById('render-me'))
+      MathJax.Hub.Queue(["Typeset",MathJax.Hub,"render-me"]);
     },
 
     // Checks if the selected option is correct or not
@@ -288,6 +292,39 @@ export default {
       this.$emit("answer-skipped", this.plioQuestion);
     },
   },
+
+  mounted(){
+    let mathJaxConfigParent = document.createElement('script')
+    mathJaxConfigParent.setAttribute('type', 'text/x-mathjax-config')
+
+    var configString = 
+    `MathJax.Hub.Config({
+        messageStyle: 'none',
+        tex2jax: {
+          preview: 'none'
+        },
+        showProcessingMessages: false, 
+        'HTML-CSS': {
+          imageFont: null
+        }
+      });`
+
+    var configInnerText = document.createTextNode(configString);
+    mathJaxConfigParent.appendChild(configInnerText);
+    document.head.appendChild(mathJaxConfigParent)
+
+    let mathJaxCDN = document.createElement('script')
+    mathJaxCDN.setAttribute('type', 'text/javascript')
+    // mathJaxCDN.async = true
+    mathJaxCDN.src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"
+    document.head.appendChild(mathJaxCDN)
+
+    console.log("script 1 --")
+    console.log(mathJaxConfigParent)
+
+    console.log("script 2 --")
+    console.log(mathJaxCDN)
+  }
 };
 </script>
 
